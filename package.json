@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "This video conferencing application, built with WebRTC for seamless peer-to-peer communication, combines Node.js, React, and Tailwind CSS for a robust, responsive, and aesthetically pleasing user experience, ideal for facilitating real-time video chats globally.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Puli Revanth Pershad",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.19.2"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
   }
 }
