@@ -13,9 +13,9 @@ const PORT = process.env.PORT || 3000;
 
 registerSocketRoutes(io);
 
-server.get('/', (req, res) => {
+app.get('/', (req, res) => {
     res.send('<h1>Welcome to the Server</h1>');
-});
+})
 
 server.listen(PORT, () => {
     console.log(`Listening on http://localhost:${PORT}`);
