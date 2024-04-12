@@ -31,9 +31,11 @@ function Meet() {
         })
         .catch(error => console.error(error));
 
-      pc.ondatachannel = event => {
-        setupDataChannel(event.channel);
-      };
+        pc.ondatachannel = event => {
+            localDataChannel.current = event.channel;
+            setupDataChannel(localDataChannel.current);
+        };
+      
     });
 
     socket.on('webrtc-answer', ({ from, answer }) => {
@@ -50,17 +52,25 @@ function Meet() {
   };
 
   const createPeerConnection = (partnerId) => {
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-    });
-    pc.onicecandidate = event => {
-      if (event.candidate) {
-        socket.emit('webrtc-ice-candidate', { to: partnerId, candidate: event.candidate.toJSON() });
+      const pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      });
+
+      // Create a DataChannel immediately and setup its event handlers
+      if (!localDataChannel.current) {
+          localDataChannel.current = pc.createDataChannel("chatChannel");
+          setupDataChannel(localDataChannel.current);
       }
-    };
-    peerConnections.current[partnerId] = pc;
-    return pc;
+
+      pc.onicecandidate = event => {
+        if (event.candidate) {
+          socket.emit('webrtc-ice-candidate', { to: partnerId, candidate: event.candidate.toJSON() });
+        }
+      };
+      peerConnections.current[partnerId] = pc;
+      return pc;
   };
+
 
   const setupDataChannel = (channel) => {
     localDataChannel.current = channel;
@@ -79,11 +89,16 @@ function Meet() {
   }, [socket]);
 
   const handleSendMessage = () => {
+    console.log('Attempting to send message'); // Check if this logs when expected
     if (localDataChannel.current && localDataChannel.current.readyState === 'open') {
       localDataChannel.current.send(JSON.stringify({ userName: "User", message }));
+      console.log('Message Sent');
       setMessage('');
+    } else {
+      console.log('DataChannel is not open or does not exist');
     }
   };
+  
 
   const copyMeetLink = () => {
     const meetLink = window.location.href;
@@ -110,15 +125,26 @@ function Meet() {
             <div key={index}>{msg.userName}: {msg.message}</div>
           ))}
         </div>
-        <div className="mt-4">
+        <div className="flex mb-20">
           <input
             type="text"
             placeholder="Type a message..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="px-4 py-2 w-full border rounded focus:outline-none"
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            className="px-4 py-2 w-full border rounded-l focus:outline-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
           />
+          <button
+            onClick={handleSendMessage}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+          </button>
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 bg-white p-4 shadow-md flex justify-between">
