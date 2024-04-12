@@ -1,5 +1,3 @@
-import { nanoid } from 'nanoid';
-
 function registerSocketRoutes(io) {
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
@@ -22,7 +20,6 @@ function registerSocketRoutes(io) {
       socket.leave(roomId);
       console.log(`${userName} left room: ${roomId}`);
       socket.to(roomId).broadcast.emit('user-left', userName);
-      // Reset stored room ID and user name upon leaving
       currentRoomId = null;
       currentUserName = null;
     });
@@ -37,17 +34,28 @@ function registerSocketRoutes(io) {
       console.log(`${userName} stopped their video in ${roomId}`);
     });
 
-    // Handling the disconnect event
+    // Handling WebRTC signaling
+    socket.on('webrtc-offer', ({ to, offer }) => {
+      console.log(`Sending offer from ${socket.id} to ${to}`);
+      socket.to(to).emit('webrtc-offer', { from: socket.id, offer });
+    });
+
+    socket.on('webrtc-answer', ({ to, answer }) => {
+      console.log(`Sending answer from ${socket.id} to ${to}`);
+      socket.to(to).emit('webrtc-answer', { from: socket.id, answer });
+    });
+
+    socket.on('webrtc-ice-candidate', ({ to, candidate }) => {
+      console.log(`Sending ICE candidate from ${socket.id} to ${to}`);
+      socket.to(to).emit('webrtc-ice-candidate', { from: socket.id, candidate });
+    });
+
     socket.on('disconnect', () => {
       console.log(`${currentUserName || 'A user'} disconnected`);
       if (currentRoomId && currentUserName) {
         socket.to(currentRoomId).broadcast.emit('user-left', currentUserName);
       }
-      // You can add additional cleanup logic here if needed
     });
-
-    // Add more event handlers here as needed
   });
 }
-
 export default registerSocketRoutes;

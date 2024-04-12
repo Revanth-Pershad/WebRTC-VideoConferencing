@@ -6,7 +6,14 @@ import registerSocketRoutes from './sockets/index.js';
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+      origin: "http://localhost:3000",  // Allow only the frontend to connect
+      methods: ["GET", "POST"],         // Allowed HTTP request methods
+      allowedHeaders: ["my-custom-header"],  // Custom headers
+      credentials: true                  // Enable credentials
+    }
+  });
 
 dotenv.config();
 const PORT = process.env.PORT || 3000;

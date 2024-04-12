@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { nanoid } from 'nanoid'; // Ensure nanoid is installed
 
 function Home() {
   const [roomUrl, setRoomUrl] = useState('');
   const [username, setUsername] = useState('');
+  const navigate = useNavigate();
 
   const createNewRoom = () => {
+    const newRoomId = nanoid(); // Generate a unique room ID
     console.log('Creating new room...');
-    // Logic to create a new room with the provided username
+    navigate(`/room/${newRoomId}`); // Navigate to the new room
   };
 
   const joinRoom = () => {
     console.log('Joining room...', roomUrl);
-    // Logic to join the room specified by the roomUrl with the provided username
+    const roomId = roomUrl.split('/').pop(); // Extract room ID from URL
+    navigate(`/room/${roomId}`); // Navigate to the existing room
   };
 
   const isJoinDisabled = !roomUrl || !username;
@@ -50,7 +55,7 @@ function Home() {
             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 w-full disabled:bg-green-200"
           >
             Join a Room
-        </button>
+          </button>
         </div>
         <p className="text-center text-sm text-gray-500 mt-4">
           Welcome to the simplest way to connect. Enter a username, then create a new room to start a meeting or join an existing one.
