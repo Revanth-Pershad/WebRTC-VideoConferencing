@@ -1,29 +1,18 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import http from 'http';
-import { Server } from 'socket.io';
-import registerSocketRoutes from './sockets/index.js';
-
+const express = require('express');
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-      origin: "http://localhost:3000",  // Allow only the frontend to connect
-      methods: ["GET", "POST"],         // Allowed HTTP request methods
-      allowedHeaders: ["my-custom-header"],  // Custom headers
-      credentials: true                  // Enable credentials
-    }
-  });
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const socketController = require('./controllers/socketController');
 
-dotenv.config();
-const PORT = process.env.PORT || 3000;
+const roomRoutes = require('./routes/route.js');
 
-registerSocketRoutes(io);
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-    res.send('<h1>Welcome to the Server</h1>');
-})
+app.use('/', roomRoutes);
 
-server.listen(PORT, () => {
-    console.log(`Listening on http://localhost:${PORT}`);
+io.on('connection', socketController.handleConnection);
+
+server.listen(3000, () => {
+  console.log("Server running on port 3000!");
 });

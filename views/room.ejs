@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script>
+    const ROOM_ID = "<%= roomId %>"
+  </script>
+  <script defer src="https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js"></script>
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="script.js" defer></script>
+  <title>Meeting</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    #video-grid video {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        margin : 4px;
+      }
+      
+  </style>
+</head>
+<body class="h-screen flex flex-col">
+
+  
+  <div id="video-grid" class="h-full bg-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <!-- The videos will be dynamically added here via JavaScript -->
+  </div>
+
+  <div id="navbar" class="h-[10%] bg-gray-800 w-full flex items-center justify-between px-4 py-3 border-t-4 border-gray-700">
+    
+    <button
+      type="button"
+      onclick="copyLink()"
+      class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300 ease-in-out"
+    >
+      Copy Meet Link!
+    </button>
+
+    <button
+      type="button"
+      onclick="leaveMeeting()"
+      class="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-300 transition duration-300 ease-in-out"
+    >
+      Leave Meeting
+    </button>
+  </div>
+
+  <script>
+    function copyLink() {
+      const meetLink = window.location.href;
+      navigator.clipboard.writeText(meetLink).then(() => {
+        alert('Meeting link copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy the link.');
+      });
+    }
+
+    function leaveMeeting() {
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>
